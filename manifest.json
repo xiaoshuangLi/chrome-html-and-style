@@ -3,7 +3,7 @@
   "name": "HTML and Style",
   "version": "0.0.1",
   "author": "Xiaoshuang Li <qq1157502759@gmail.com>",
-  "minimum_chrome_version": "37.0.0",
+  "minimum_chrome_version": "66.0.0",
   "description": "Get html and style for element.",
   "devtools_page": "devtools.html",
   "background": {

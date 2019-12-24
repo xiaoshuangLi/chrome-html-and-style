@@ -68,7 +68,14 @@ Element.prototype.serializeWithStyles = (function() {
         cssTexts[i] = e.style.cssText;
         for (var ii = 0; ii < computedStyle.length; ii++) {
           var cssPropName = computedStyle[ii];
-          if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
+          if (cssPropName === 'width' || cssPropName === 'height') {
+            var styleMap = e.computedStyleMap() || {};
+            var styleValue = styleMap.get(cssPropName) || {};
+
+            if (styleValue.value !== 'auto') {
+              e.style[cssPropName] = computedStyle[cssPropName];
+            }
+          } else if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
             e.style[cssPropName] = computedStyle[cssPropName];
           }
         }
