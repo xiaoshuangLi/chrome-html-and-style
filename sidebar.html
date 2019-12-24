@@ -1,0 +1,47 @@
+<html>
+  <meta charset="UTF-8">
+  <style>
+    .content {
+      position: relative;
+    }
+
+    .text {
+      cursor: pointer;
+    }
+
+    .text:hover {
+      opacity: .85;
+    }
+
+    .text:empty::after {
+      content: 'Please select elemnt.';
+      color: #999;
+    }
+
+    .text.copied:before {
+      content: 'Copied';
+      padding: 0 5px;
+      margin-right: 5px;
+      border-radius: 5px;
+      color: white;
+      background: #87d068;
+    }
+
+    textarea {
+      position: fixed;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    button {
+      float: left;
+      margin-right: 5px;
+    }
+  </style>
+<body>
+  <div id="content" class="content">
+    <textarea id="input"></textarea>
+    <span id="text" class="text" title="click to copy"></span>
+  </div>
+</body>
+</html>

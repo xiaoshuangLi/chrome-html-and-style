@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "HTML and Style",
+  "version": "0.0.1",
+  "author": "Xiaoshuang Li <qq1157502759@gmail.com>",
+  "minimum_chrome_version": "37.0.0",
+  "description": "Get html and style for element.",
+  "devtools_page": "devtools.html",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "web_accessible_resources": [
+    "content.js"
+  ],
+  "permissions": [
+    "<all_urls>",
+    "tabs"
+  ],
+  "content_security_policy": "script-src 'self' ; object-src 'self'"
+}
