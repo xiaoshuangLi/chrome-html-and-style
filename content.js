@@ -41,7 +41,10 @@ Element.prototype.serializeWithStyles = (function() {
     var styleMap = element.computedStyleMap();
 
     styleKeys.forEach((styleKey) => {
-      defaultStyle[styleKey] = styleMap.get(styleKey).toString();
+      var styleCSSValue = styleMap.get(styleKey)
+      var styleValue = styleCSSValue && styleCSSValue.toString();
+
+      defaultStyle[styleKey] = styleValue;
     });
 
     return defaultStyle;
@@ -79,7 +82,8 @@ Element.prototype.serializeWithStyles = (function() {
 
         for (var ii = 0; ii < styleKeys.length; ii++) {
           var cssPropName = styleKeys[ii];
-          var styleValue = styleMap.get(cssPropName).toString();
+          var styleCSSValue = styleMap.get(cssPropName)
+          var styleValue = styleCSSValue && styleCSSValue.toString();
 
           if (cssPropName === 'box-sizing') {
             clonedE.style[cssPropName] = styleValue;
