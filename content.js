@@ -60,30 +60,41 @@ Element.prototype.serializeWithStyles = (function() {
     var children = Array.from(this.querySelectorAll('*'));
     var elements = children.concat(this);
 
+    var clonedRoot = this.cloneNode(true);
+    var clonedChildren = Array.from(clonedRoot.querySelectorAll('*'));
+    var clonedElements = clonedChildren.concat(clonedRoot);
+
     for (var i = 0; i < elements.length; i++) {
       var e = elements[i];
+      var clonedE = clonedElements[i];
+
       if (!noStyleTags[e.tagName]) {
         var computedStyle = getComputedStyle(e);
         var defaultStyle = getDefaultStyleByTagName(e.tagName);
+
         cssTexts[i] = e.style.cssText;
+
         for (var ii = 0; ii < computedStyle.length; ii++) {
           var cssPropName = computedStyle[ii];
+
           if (cssPropName === 'width' || cssPropName === 'height') {
             var styleMap = e.computedStyleMap() || {};
             var styleValue = styleMap.get(cssPropName) || {};
 
             if (styleValue.value !== 'auto') {
-              e.style[cssPropName] = computedStyle[cssPropName];
+              clonedE.style[cssPropName] = computedStyle[cssPropName];
             }
+          } else if (cssPropName === 'box-sizing') {
+            clonedE.style[cssPropName] = computedStyle[cssPropName];
           } else if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
-            e.style[cssPropName] = computedStyle[cssPropName];
+            clonedE.style[cssPropName] = computedStyle[cssPropName];
           }
         }
       }
     }
-    var result = this.outerHTML;
-    for (var i = 0; i < elements.length; i++) {
-      elements[i].style.cssText = cssTexts[i];
+    var result = clonedRoot.outerHTML;
+    for (var i = 0; i < clonedElements.length; i++) {
+      clonedElements[i].style.cssText = cssTexts[i];
     }
 
     return result;
