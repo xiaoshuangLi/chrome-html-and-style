@@ -1,8 +1,4 @@
 (function() {
-  var port = chrome.runtime.connect({
-    name: 'chrome-html-and-style-devtools'
-  });
-
   chrome.devtools.panels.elements.createSidebarPane('HTML and Style', function(sidebar) {
     var root = null;
     var textDom = null;
@@ -13,11 +9,6 @@
       textDom.classList.add('copied');
       root.document.execCommand('copy');
     };
-
-    port.postMessage({
-      type: 'inject',
-      tabId: chrome.devtools.inspectedWindow.tabId,
-    });
 
     sidebar.setPage('sidebar.html');
 
