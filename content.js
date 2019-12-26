@@ -86,6 +86,7 @@ Element.prototype.serializeWithStyles = (function() {
 
     elements.forEach((element, index) => {
       const { tagName, style = {}, parentElement } = element;
+      const { tagName: parentTagName } = parentElement;
       const clonedElement = clonedElements[index];
       const noStyle = noStyleTags.includes(tagName);
 
@@ -106,8 +107,9 @@ Element.prototype.serializeWithStyles = (function() {
           if (clonedRoot !== clonedElement) {
             const inherited = inheritedStyleKeys.includes(styleKey);
             const parentStyleValue = getStyleValueFromStyleMap(parentStyleMap, styleKey);
+            const same = parentTagName === tagName && parentStyleValue === styleValue
 
-            if (!inherited || parentStyleValue !== styleValue) {
+            if (!inherited || !same) {
               clonedElement.style[styleKey] = styleValue; 
             }
           } else {
