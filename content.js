@@ -1,54 +1,63 @@
 Element.prototype.serializeWithStyles = (function() {
-  // Mapping between tag names and css default values lookup tables. This allows to exclude default values in the result.
-  var defaultStylesByTagName = {};
-
   // Styles inherited from style sheets will not be rendered for elements with these tag names
-  var noStyleTags = {
-    'BASE': true,
-    'HEAD': true,
-    'HTML': true,
-    'META': true,
-    'NOFRAME': true,
-    'NOSCRIPT': true,
-    'PARAM': true,
-    'SCRIPT': true,
-    'STYLE': true,
-    'TITLE': true
-  };
+  const noStyleTags = [
+    'BASE',
+    'HEAD',
+    'HTML',
+    'META',
+    'NOFRAME',
+    'NOSCRIPT',
+    'PARAM',
+    'SCRIPT',
+    'STYLE',
+    'TITLE'
+  ];
 
   // This list determines which css default values lookup tables are precomputed at load time
   // Lookup tables for other tag names will be automatically built at runtime if needed
-  var tagNames = ['A', 'ABBR', 'ADDRESS', 'AREA', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', 'BASE', 'BDI', 'BDO', 'BLOCKQUOTE', 'BODY', 'BR', 'BUTTON', 'CANVAS', 'CAPTION', 'CENTER', 'CITE', 'CODE', 'COL', 'COLGROUP', 'COMMAND', 'DATALIST', 'DD', 'DEL', 'DETAILS', 'DFN', 'DIV', 'DL', 'DT', 'EM', 'EMBED', 'FIELDSET', 'FIGCAPTION', 'FIGURE', 'FONT', 'FOOTER', 'FORM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HEAD', 'HEADER', 'HGROUP', 'HR', 'HTML', 'I', 'IFRAME', 'IMG', 'INPUT', 'INS', 'KBD', 'KEYGEN', 'LABEL', 'LEGEND', 'LI', 'LINK', 'MAP', 'MARK', 'MATH', 'MENU', 'META', 'METER', 'NAV', 'NOBR', 'NOSCRIPT', 'OBJECT', 'OL', 'OPTION', 'OPTGROUP', 'OUTPUT', 'P', 'PARAM', 'PRE', 'PROGRESS', 'Q', 'RP', 'RT', 'RUBY', 'S', 'SAMP', 'SCRIPT', 'SECTION', 'SELECT', 'SMALL', 'SOURCE', 'SPAN', 'STRONG', 'STYLE', 'SUB', 'SUMMARY', 'SUP', 'SVG', 'TABLE', 'TBODY', 'TD', 'TEXTAREA', 'TFOOT', 'TH', 'THEAD', 'TIME', 'TITLE', 'TR', 'TRACK', 'U', 'UL', 'VAR', 'VIDEO', 'WBR'];
-  var styleKeys = Array.from(document.body.computedStyleMap().keys());
+  const tagNames = ['A', 'ABBR', 'ADDRESS', 'AREA', 'ARTICLE', 'ASIDE', 'AUDIO', 'B', 'BASE', 'BDI', 'BDO', 'BLOCKQUOTE', 'BODY', 'BR', 'BUTTON', 'CANVAS', 'CAPTION', 'CENTER', 'CITE', 'CODE', 'COL', 'COLGROUP', 'COMMAND', 'DATALIST', 'DD', 'DEL', 'DETAILS', 'DFN', 'DIV', 'DL', 'DT', 'EM', 'EMBED', 'FIELDSET', 'FIGCAPTION', 'FIGURE', 'FONT', 'FOOTER', 'FORM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HEAD', 'HEADER', 'HGROUP', 'HR', 'HTML', 'I', 'IFRAME', 'IMG', 'INPUT', 'INS', 'KBD', 'KEYGEN', 'LABEL', 'LEGEND', 'LI', 'LINK', 'MAP', 'MARK', 'MATH', 'MENU', 'META', 'METER', 'NAV', 'NOBR', 'NOSCRIPT', 'OBJECT', 'OL', 'OPTION', 'OPTGROUP', 'OUTPUT', 'P', 'PARAM', 'PRE', 'PROGRESS', 'Q', 'RP', 'RT', 'RUBY', 'S', 'SAMP', 'SCRIPT', 'SECTION', 'SELECT', 'SMALL', 'SOURCE', 'SPAN', 'STRONG', 'STYLE', 'SUB', 'SUMMARY', 'SUP', 'SVG', 'TABLE', 'TBODY', 'TD', 'TEXTAREA', 'TFOOT', 'TH', 'THEAD', 'TIME', 'TITLE', 'TR', 'TRACK', 'U', 'UL', 'VAR', 'VIDEO', 'WBR'];
+  const bodyStyleMap = document.body.computedStyleMap();
+  const styleKeys = Array.from(bodyStyleMap.keys());
 
-  // Precompute the lookup tables.
-  for (var i = 0; i < tagNames.length; i++) {
-    if (!noStyleTags[tagNames[i]]) {
-      defaultStylesByTagName[tagNames[i]] = computeDefaultStyleByTagName(tagNames[i]);
-    }
-  }
+  let iframe;
 
-  var iframe;
-
-  function computeDefaultStyleByTagName(tagName) {
+  function getDefaultStyleMapByTagName(tagName) {
     if (!iframe) {
       iframe = document.body.appendChild(document.createElement('IFRAME'));
       iframe.setAttribute('style', 'position: fixed; opacity: 0; pointer-events: none;');
     }
 
-    var defaultStyle = {};
-    var element = iframe.contentDocument.body.appendChild(document.createElement(tagName));
-    var styleMap = element.computedStyleMap();
+    const element = document.createElement(tagName);
 
-    styleKeys.forEach((styleKey) => {
-      var styleCSSValue = styleMap.get(styleKey)
-      var styleValue = styleCSSValue && styleCSSValue.toString();
-
-      defaultStyle[styleKey] = styleValue;
-    });
-
-    return defaultStyle;
+    iframe.contentDocument.body.appendChild(element);
+    return element.computedStyleMap();
   }
+
+  function getStyleValueFromStyleMap(styleMap, styleKey) {
+    const styleCSSValue = styleMap.get(styleKey);
+
+    return styleCSSValue && styleCSSValue.toString();
+  }
+
+  function computeDefaultStyleByTagName(tagName) {
+    const styleMap = getDefaultStyleMapByTagName(tagName);
+
+    return styleKeys.reduce((defaultStyle = {}, styleKey) => {
+      defaultStyle[styleKey] = getStyleValueFromStyleMap(styleMap, styleKey);
+
+      return defaultStyle;
+    }, {});
+  }
+
+  const defaultStylesByTagName = tagNames.reduce((res = {}, tagName) => {
+    const noStyle = noStyleTags.includes(tagName);
+
+    if (!noStyle) {
+      res[tagName] = computeDefaultStyleByTagName(tagName);
+    }
+
+    return res;
+  }, {});
 
   function getDefaultStyleByTagName(tagName) {
     tagName = tagName.toUpperCase();
@@ -58,46 +67,45 @@ Element.prototype.serializeWithStyles = (function() {
     return defaultStylesByTagName[tagName];
   }
 
+  function getElements(root, cloned = false) {
+    root = cloned ? root.cloneNode(true) : root;
+    const children = Array.from(root.querySelectorAll('*'));
+
+    return [root, ...children];
+  };
+
   return function serializeWithStyles() {
     if (this.nodeType !== Node.ELEMENT_NODE) {
       throw new TypeError();
     }
-    var cssTexts = [];
-    var children = Array.from(this.querySelectorAll('*'));
-    var elements = children.concat(this);
 
-    var clonedRoot = this.cloneNode(true);
-    var clonedChildren = Array.from(clonedRoot.querySelectorAll('*'));
-    var clonedElements = clonedChildren.concat(clonedRoot);
+    const elements = getElements(this);
+    const clonedElements = getElements(this, true);
+    const [clonedRoot] = clonedElements;
 
-    for (var i = 0; i < elements.length; i++) {
-      var e = elements[i];
-      var clonedE = clonedElements[i];
+    elements.forEach((element, index) => {
+      const { tagName, style = {} } = element;
+      const clonedElement = clonedElements[index];
+      const noStyle = noStyleTags.includes(tagName);
 
-      if (!noStyleTags[e.tagName]) {
-        var styleMap = e.computedStyleMap();
-        var defaultStyle = getDefaultStyleByTagName(e.tagName);
-
-        cssTexts[i] = e.style.cssText;
-
-        for (var ii = 0; ii < styleKeys.length; ii++) {
-          var cssPropName = styleKeys[ii];
-          var styleCSSValue = styleMap.get(cssPropName)
-          var styleValue = styleCSSValue && styleCSSValue.toString();
-
-          if (cssPropName === 'box-sizing') {
-            clonedE.style[cssPropName] = styleValue;
-          } else if (styleValue !== defaultStyle[cssPropName]) {
-            clonedE.style[cssPropName] = styleValue;
-          }
-        }
+      if (noStyle) {
+        return;
       }
-    }
-    var result = clonedRoot.outerHTML;
-    for (var i = 0; i < clonedElements.length; i++) {
-      clonedElements[i].style.cssText = cssTexts[i];
-    }
 
-    return result;
+      const styleMap = element.computedStyleMap();
+      const defaultStyle = getDefaultStyleByTagName(tagName);
+
+      styleKeys.forEach((styleKey) => {
+        const styleValue = getStyleValueFromStyleMap(styleMap, styleKey);
+
+        if (styleKey === 'box-sizing') {
+          clonedElement.style[styleKey] = styleValue;
+        } else if (styleValue !== defaultStyle[styleKey]) {
+          clonedElement.style[styleKey] = styleValue;
+        }
+      });
+    });
+
+    return clonedRoot.outerHTML;
   }
 })();
